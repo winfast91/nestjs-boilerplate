@@ -38,3 +38,6 @@ lerna-debug.log*
 /files
 .env
 /ormconfig.json
+id_rsa
+id_rsa.pub
+
