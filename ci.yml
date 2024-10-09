@@ -1,0 +1,38 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run build
+      run: npm run build 
+
+    - name: Deploy to VDS
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+      run: |
+	sshpass -p "zrtz4+,YSkYh-g" ssh -o StrictHostKeyChecking=no root@195.133.41.51 << 'EOF'
+        docker pull <мой образ докера>
+	docker stop <имя старого контейнера> || true
+	docker rm <имя старого контейнер> || true
+	docker run -d -p 80:80 <мой образ докера>
+	EOF
+
+
