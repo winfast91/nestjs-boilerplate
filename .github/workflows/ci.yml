@@ -40,10 +40,10 @@ jobs:
 
       # Новый шаг: Деплой на VDS через SSH
       - name: Deploy to Server
-  env:
-    SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-  run: |
-    mkdir -p ~/.ssh
-    echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-    chmod 600 ~/.ssh/id_rsa
-    ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@195.133.41.51 'docker pull winfast91/nestjs-boilerplate:${{ github.sha }} && docker stop nestjs_app || true && docker rm nestjs_app || true && docker run -d --name nestjs_app -p 4000:3000 winfast91/nestjs-boilerplate:${{ github.sha }}'
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@195.133.41.51 'docker pull winfast91/nestjs-boilerplate:${{ github.sha }} && docker stop nestjs_app || true && docker rm nestjs_app || true && docker run -d --name nestjs_app -p 4000:3000 winfast91/nestjs-boilerplate:${{ github.sha }}'
