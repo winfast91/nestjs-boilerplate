@@ -1,47 +1,28 @@
-name: CI/CD Pipeline
-
-on:
-  push:
-    branches:
-      - main
-      - dev
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      # Существующие шаги для тестирования или сборки, если они есть
-      # Например:
-      # - name: Install dependencies
-      #   run: npm install
-      # - name: Run tests
-      #   run: npm test
-
-      # Новый шаг: Логин в Docker Hub
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
+      
+      # Обычные шаги сборки Docker образа
       - name: Build Docker Image
-        run: |
-          docker build -t winfast91/nestjs-boilerplate:${{ github.sha }} .
+        run: docker build -t winfast91/nestjs-boilerplate:${{ github.sha }} .
 
       - name: Push Docker Image
-        run: |
-          docker push winfast91/nestjs-boilerplate:${{ github.sha }}
+        run: docker push winfast91/nestjs-boilerplate:${{ github.sha }}
 
-      # Новый шаг: Деплой на VDS через SSH
+      # Шаги деплоя в зависимости от ветки
       - name: Deploy to Server
+        if: github.ref == 'refs/heads/main'
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@195.133.41.51 'docker pull winfast91/nestjs-boilerplate:${{ github.sha }} && docker stop nestjs_app || true && docker rm nestjs_app || true && docker run -d --name nestjs_app -p 4000:3000 winfast91/nestjs-boilerplate:${{ github.sha }}'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@195.133.41.51 'docker pull winfast91/nestjs-boilerplate:${{ github.sha }} && docker stop backend_main || true && docker rm backend_main || true && docker run -d --name backend_main -p 5000:3000 winfast91/nestjs-boilerplate:${{ github.sha }}'
+
+      - name: Deploy to Server Dev
+        if: github.ref == 'refs/heads/dev'
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@195.133.41.51 'docker pull winfast91/nestjs-boilerplate:${{ github.sha }} && docker stop backend_dev || true && docker rm backend_dev || true && docker run -d --name backend_dev -p 4000:3000 winfast91/nestjs-boilerplate:${{ github.sha }}'

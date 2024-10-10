@@ -19,7 +19,6 @@ import { AuthFacebookModule } from './auth-facebook/auth-facebook.module';
 import { AuthGoogleModule } from './auth-google/auth-google.module';
 import { AuthTwitterModule } from './auth-twitter/auth-twitter.module';
 import { I18nModule } from 'nestjs-i18n/dist/i18n.module';
-import { HeaderResolver } from 'nestjs-i18n';
 import { TypeOrmConfigService } from './database/typeorm-config.service';
 import { MailModule } from './mail/mail.module';
 import { HomeModule } from './home/home.module';
@@ -69,23 +68,12 @@ const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
           infer: true,
         }),
         loaderOptions: { path: path.join(__dirname, '/i18n/'), watch: true },
+        path: path.join(__dirname, '/i18n/'), // Убедитесь, что это свойство включено
       }),
-      resolvers: [
-        {
-          use: HeaderResolver,
-          useFactory: (configService: ConfigService<AllConfigType>) => {
-            return [
-              configService.get('app.headerLanguage', {
-                infer: true,
-              }),
-            ];
-          },
-          inject: [ConfigService],
-        },
-      ],
       imports: [ConfigModule],
       inject: [ConfigService],
     }),
+
     UsersModule,
     FilesModule,
     AuthModule,
