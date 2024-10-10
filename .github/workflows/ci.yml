@@ -36,6 +36,7 @@ jobs:
         run: |
           docker push winfast91/nestjs-boilerplate:${{ github.sha }}
 
+      # Новый шаг: Деплой на VDS через SSH
       - name: Deploy to Server
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
